@@ -1,0 +1,69 @@
+# Python 通用忽略
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# 虚拟环境
+venv/
+env/
+.venv/
+.env/
+
+# 临时文件 & IDE
+*.swp
+*.swo
+*.swn
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+*.bak
+*.tmp
+
+# 项目中临时截图（最重要！）
+temp_screenshot*.jpg
+temp_screenshot.jpg
+temp_*.jpg
+temp_*.png
+screenshot_*.jpg
+*.temp.jpg
+*.temp.png
+
+# 其他可能生成的临时文件
+*.pyc
+*.pyo
+*.pyd
+Pipfile.lock
+poetry.lock
+
+# 调试/测试文件
+test_*.py
+tests/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# 个人配置文件（可选，根据需要保留或忽略）
+# config.ini
+# cv_config.json   ← 如果你希望 git 管理它就不要加这一行

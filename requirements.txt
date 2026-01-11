@@ -1,0 +1,30 @@
+# requirements.txt - WeChat Moments Auto-Liker 项目依赖
+
+# 核心功能依赖
+opencv-python>=4.8.0.74           # 图像处理、模板匹配、SIFT 等
+numpy>=1.24.0                     # 数值计算、数组操作
+requests>=2.28.0                  # HTTP 请求，用于调用 CV 服务
+pillow>=9.5.0                     # 图像读写辅助（部分场景）
+
+# FastAPI + Uvicorn - 本地 CV 服务器
+fastapi>=0.95.0                   # 高性能 API 框架
+uvicorn>=0.20.0                   # ASGI 服务器
+
+# 其他常用工具库
+tqdm>=4.65.0                      # 进度条（可选，用于调试）
+shlex>=1.0.0                      # 命令行参数安全解析
+
+# 开发/调试辅助（可选，但推荐安装）
+pytest>=7.4.0                     # 单元测试框架
+black>=23.0.0                     # 代码格式化
+isort>=5.12.0                     # 导入排序
+flake8>=6.0.0                     # 代码风格检查
+
+# 环境说明
+# Python >= 3.9
+# 安装命令：
+#   pip install -r requirements.txt
+#
+# 如果使用 poetry：
+#   poetry add opencv-python numpy requests pillow fastapi uvicorn
+#   poetry add --group dev pytest black isort flake8
