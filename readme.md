@@ -2,18 +2,18 @@
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?logo=opensourceinitiative)](https://opensource.org/licenses/MIT)
-[![GitHub stars](https://img.shields.io/github/stars/yourusername/wechat-moments-auto-liker?style=for-the-badge&color=yellow&logo=github)](https://github.com/yourusername/wechat-moments-auto-liker/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/yourusername/wechat-moments-auto-liker?style=for-the-badge&color=teal&logo=github)](https://github.com/yourusername/wechat-moments-auto-liker/network/members)
-[![GitHub issues](https://img.shields.io/github/issues/yourusername/wechat-moments-auto-liker?style=for-the-badge&color=red&logo=github)](https://github.com/yourusername/wechat-moments-auto-liker/issues)
-[![Pull Requests](https://img.shields.io/github/issues-pr/yourusername/wechat-moments-auto-liker?style=for-the-badge&color=purple&logo=github)](https://github.com/yourusername/wechat-moments-auto-liker/pulls)
-[![Last Commit](https://img.shields.io/github/last-commit/yourusername/wechat-moments-auto-liker?style=for-the-badge&logo=git&logoColor=white&color=green)](https://github.com/yourusername/wechat-moments-auto-liker/commits/main)
-[![Contributors](https://img.shields.io/github/contributors/yourusername/wechat-moments-auto-liker?style=for-the-badge&color=brightgreen&logo=github)](https://github.com/yourusername/wechat-moments-auto-liker/graphs/contributors)
-[![Code Size](https://img.shields.io/github/languages/code-size/yourusername/wechat-moments-auto-liker?style=for-the-badge&logo=python&color=blueviolet)](https://github.com/yourusername/wechat-moments-auto-liker)
-[![Top Language](https://img.shields.io/github/languages/top/yourusername/wechat-moments-auto-liker?style=for-the-badge&logo=python&color=ff69b4)](https://github.com/yourusername/wechat-moments-auto-liker)
-[![CI Status](https://img.shields.io/github/actions/workflow/status/yourusername/wechat-moments-auto-liker/ci.yml?branch=main&style=for-the-badge&logo=github&label=CI)](https://github.com/yourusername/wechat-moments-auto-liker/actions)
-[![CodeQL Security](https://img.shields.io/github/workflow/status/yourusername/wechat-moments-auto-liker/CodeQL?style=for-the-badge&logo=github&label=CodeQL)](https://github.com/yourusername/wechat-moments-auto-liker/security/code-scanning)
+[![GitHub stars](https://img.shields.io/github/stars/throokie/pyquan-like?style=for-the-badge&color=yellow&logo=github)](https://github.com/throokie/pyquan-like/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/throokie/pyquan-like?style=for-the-badge&color=teal&logo=github)](https://github.com/throokie/pyquan-like/network/members)
+[![GitHub issues](https://img.shields.io/github/issues/throokie/pyquan-like?style=for-the-badge&color=red&logo=github)](https://github.com/throokie/pyquan-like/issues)
+[![Pull Requests](https://img.shields.io/github/issues-pr/throokie/pyquan-like?style=for-the-badge&color=purple&logo=github)](https://github.com/throokie/pyquan-like/pulls)
+[![Last Commit](https://img.shields.io/github/last-commit/throokie/pyquan-like?style=for-the-badge&logo=git&logoColor=white&color=green)](https://github.com/throokie/pyquan-like/commits/main)
+[![Contributors](https://img.shields.io/github/contributors/throokie/pyquan-like?style=for-the-badge&color=brightgreen&logo=github)](https://github.com/throokie/pyquan-like/graphs/contributors)
+[![Code Size](https://img.shields.io/github/languages/code-size/throokie/pyquan-like?style=for-the-badge&logo=python&color=blueviolet)](https://github.com/throokie/pyquan-like)
+[![Top Language](https://img.shields.io/github/languages/top/throokie/pyquan-like?style=for-the-badge&logo=python&color=ff69b4)](https://github.com/throokie/pyquan-like)
+[![CI Status](https://img.shields.io/github/actions/workflow/status/throokie/pyquan-like/ci.yml?branch=main&style=for-the-badge&logo=github&label=CI)](https://github.com/throokie/pyquan-like/actions)
+[![CodeQL Security](https://img.shields.io/github/workflow/status/throokie/pyquan-like/CodeQL?style=for-the-badge&logo=github&label=CodeQL)](https://github.com/throokie/pyquan-like/security/code-scanning)
 [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103&style=for-the-badge)](https://github.com/ellerbrock/open-source-badges/)
-[![Made with ❤️ in China](https://img.shields.io/badge/Made%20with%20❤️%20in-China-ff69b4.svg?style=for-the-badge)](https://github.com/yourusername/wechat-moments-auto-liker)
+[![Made with ❤️ in China](https://img.shields.io/badge/Made%20with%20❤️%20in-China-ff69b4.svg?style=for-the-badge)](https://github.com/throokie/pyquan-like)
 
 **WeChat Moments Auto-Liker Pro** 是目前最强微信朋友圈自动化点赞工具，融合 **航天级视觉算法 + 多设备并行 + 智能防封机制**，让你轻松实现「朋友圈刷屏式互动」！  
 **已累计帮助数万用户提升社交效率** —— 现在，轮到你成为下一个社交之王了！🌟
@@ -39,19 +39,19 @@
 
 | 类别             | 徽章                                                                 | 说明                          |
 |------------------|----------------------------------------------------------------------|-------------------------------|
-| 项目活跃度       | [![Stars](https://img.shields.io/github/stars/yourusername/wechat-moments-auto-liker?style=for-the-badge&logo=github&color=yellow)](https://github.com/yourusername/wechat-moments-auto-liker/stargazers) | 当前星标数（实时）            |
-| 社区贡献         | [![Contributors](https://img.shields.io/github/contributors/yourusername/wechat-moments-auto-liker?style=for-the-badge&color=brightgreen&logo=github)](https://github.com/yourusername/wechat-moments-auto-liker/graphs/contributors) | 贡献者数量                    |
-| 代码质量         | [![CodeQL](https://img.shields.io/github/workflow/status/yourusername/wechat-moments-auto-liker/CodeQL?style=for-the-badge&logo=github&label=CodeQL)](https://github.com/yourusername/wechat-moments-auto-liker/security/code-scanning) | 自动安全扫描通过              |
-| 构建状态         | [![CI](https://img.shields.io/github/actions/workflow/status/yourusername/wechat-moments-auto-liker/ci.yml?branch=main&style=for-the-badge&logo=github&label=CI)](https://github.com/yourusername/wechat-moments-auto-liker/actions) | CI/CD 持续集成                |
-| 编程语言         | [![Top Language](https://img.shields.io/github/languages/top/yourusername/wechat-moments-auto-liker?style=for-the-badge&logo=python&color=ff69b4)](https://github.com/yourusername/wechat-moments-auto-liker) | Python 占比最高               |
+| 项目活跃度       | [![Stars](https://img.shields.io/github/stars/throokie/pyquan-like?style=for-the-badge&logo=github&color=yellow)](https://github.com/throokie/pyquan-like/stargazers) | 当前星标数（实时）            |
+| 社区贡献         | [![Contributors](https://img.shields.io/github/contributors/throokie/pyquan-like?style=for-the-badge&color=brightgreen&logo=github)](https://github.com/throokie/pyquan-like/graphs/contributors) | 贡献者数量                    |
+| 代码质量         | [![CodeQL](https://img.shields.io/github/workflow/status/throokie/pyquan-like/CodeQL?style=for-the-badge&logo=github&label=CodeQL)](https://github.com/throokie/pyquan-like/security/code-scanning) | 自动安全扫描通过              |
+| 构建状态         | [![CI](https://img.shields.io/github/actions/workflow/status/throokie/pyquan-like/ci.yml?branch=main&style=for-the-badge&logo=github&label=CI)](https://github.com/throokie/pyquan-like/actions) | CI/CD 持续集成                |
+| 编程语言         | [![Top Language](https://img.shields.io/github/languages/top/throokie/pyquan-like?style=for-the-badge&logo=python&color=ff69b4)](https://github.com/throokie/pyquan-like) | Python 占比最高               |
 | 开源精神         | [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103&style=for-the-badge)](https://github.com/ellerbrock/open-source-badges/) | 我们热爱开源！                |
 
 ## 快速上手（30秒起飞）
 
 ```bash
 # 1. 克隆项目
-git clone https://github.com/yourusername/wechat-moments-auto-liker.git
-cd wechat-moments-auto-liker
+git clone https://github.com/throokie/pyquan-like.git
+cd pyquan-like
 
 # 2. 安装依赖（一键安装核心包）
 pip install -r requirements.txt
