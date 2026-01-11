@@ -16,7 +16,7 @@
 [![Made with ❤️ in China](https://img.shields.io/badge/Made%20with%20❤️%20in-China-ff69b4.svg?style=for-the-badge)](https://github.com/throokie/pyquan-like)
 
 **WeChat Moments Auto-Liker Pro** 是目前最强微信朋友圈自动化点赞工具，融合 **航天级视觉算法 + 多设备并行 + 智能防封机制**，让你轻松实现「朋友圈刷屏式互动」！  
-**已累计帮助数万用户提升社交效率** —— 现在，轮到你成为下一个社交之王了！🌟
+**已累计帮助1用户提升社交效率** —— 现在，轮到你成为下一个社交之王了！🌟
 
 > **一句话口号**：  
 > 手动点赞？太 2020 了！2026 年，让 Bot 替你疯狂打 call！
