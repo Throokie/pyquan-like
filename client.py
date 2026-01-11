@@ -28,7 +28,8 @@ class Config:
     
     SEEDS = {
         "dots": "two_dots_orig.png", 
-        "like": "like_hollow_orig.png"
+        "like": "like_hollow_orig.png",
+        "pengyouquan": "pengyouquan.png"
     }
     
     # --- 滑动策略 ---
@@ -37,7 +38,7 @@ class Config:
     MAX_SWIPE_DIST_PCT = 0.30  # 减小最大距离，避免滑过头
     
     # --- 区域阈值 ---
-    TOP_DEAD_ZONE = 200      
+    TOP_DEAD_ZONE_PCT = 0.1      
     BOTTOM_SAFE_LINE = 0.85  
     
     BURST_LIMIT = 40          
@@ -46,11 +47,17 @@ class Config:
     UI_CHANGE_DIFF = 10.0     
     POLL_INTERVAL = 0.05
     
-    # [新增] 聚类去重距离 (像素平方)
-    CLUSTER_DIST_SQ = 2500 
+    # [新增] 聚类去重距离 (基于高度基准的平方)
+    CLUSTER_DIST_SQ_BASE = 2500 
     
-    # [新增] 滑动缓冲像素（防滑不足）
-    SWIPE_BUFFER_PX = 20
+    # [新增] 滑动缓冲百分比
+    SWIPE_BUFFER_PCT = 0.01
+
+    # [新增] ROI偏移百分比（用于check_liked_status等）
+    ROI_OFFSET_PCT = 0.03
+
+    # [新增] 默认点赞限额
+    LIKE_LIMIT_DEFAULT = 2000
 
     # ADB 相关配置
     ADB_PATH = "adb"  # 如果adb不在PATH中，改为绝对路径如 "C:/platform-tools/adb.exe"
@@ -211,7 +218,7 @@ class VisualServo:
             for t in targets:
                 # 计算欧氏距离的平方
                 dist_sq = (cx - t[0])**2 + (cy - t[1])**2
-                if dist_sq < Config.CLUSTER_DIST_SQ:
+                if dist_sq < self.cluster_dist_sq:  # 使用动态值
                     is_new = False
                     break
             
@@ -234,7 +241,7 @@ class VisualServo:
         gray_tpl = cv2.cvtColor(tpl, cv2.COLOR_BGR2GRAY)
         tH, tW = gray_tpl.shape[:2]
         best = None
-        for scale in np.linspace(0.8, 1.2, 5):
+        for scale in np.linspace(0.5, 2.0, 15):
             resized = cv2.resize(gray_tpl, (int(tW * scale), int(tH * scale)))
             if gray_screen.shape[0] < resized.shape[0] or gray_screen.shape[1] < resized.shape[1]: continue
             res = cv2.matchTemplate(gray_screen, resized, cv2.TM_CCOEFF_NORMED)
@@ -291,67 +298,91 @@ class VisualServo:
 
 # ================= 4. 中央控制器 =================
 class BotController:
-    def __init__(self, device_id: str):
+    def __init__(self, device_id: str, like_limit: int):
         self.adb_manager = ADBManager(device_id)
         self.width = self.adb_manager.width
         self.height = self.adb_manager.height
         self.safe_y_limit = int(self.height * Config.BOTTOM_SAFE_LINE)
+        self.top_dead_zone = int(self.height * Config.TOP_DEAD_ZONE_PCT)
+        self.cluster_dist_sq = int((self.height / 2400) * Config.CLUSTER_DIST_SQ_BASE)
+        self.swipe_buffer_px = int(self.height * Config.SWIPE_BUFFER_PCT)
+        self.roi_offset = int(self.height * Config.ROI_OFFSET_PCT)
         
         self.servo = VisualServo(self.adb_manager)
         self.runtime_assets = {}
         self.vector = None       
         self.action_count = 0
+        self.like_count = 0
+        self.like_limit = like_limit
         self.last_cy = None  # [新增] 记录上一个处理的 Y 位置，用于优化距离计算
+        
+        self.servo.cluster_dist_sq = self.cluster_dist_sq
 
     def random_sleep(self, min_s, max_s):
         time.sleep(random.uniform(min_s, max_s))
 
-    def calibrate(self):
+    def calibrate(self, max_retries=3):
         logger.info(f"🛠 [{self.adb_manager.device_id}] 正在校准...")
-        screen = self.servo.get_screen_cv()
-        if screen is None:
-            logger.error(f"❌ [{self.adb_manager.device_id}] 无法获取屏幕截图")
-            return False
-            
-        match = self.servo.multiscale_match(screen, Config.SEEDS["dots"])
-        if not match: match = self.servo.call_sift_server(screen, "dots")
-        
-        if not match:
-            logger.critical(f"❌ [{self.adb_manager.device_id}] 校准失败: 未找到按钮")
-            return False
-            
-        d_pos, d_rect = match['pos'], match['rect']
-        self.runtime_assets["dots"] = screen[d_rect[1]:d_rect[3], d_rect[0]:d_rect[2]]
-        
-        self.adb_manager.touch(*d_pos)
-        time.sleep(1.0) 
-        menu_screen = self.servo.get_screen_cv()
-        
-        if menu_screen is None:
-            logger.error(f"❌ [{self.adb_manager.device_id}] 无法获取菜单屏幕截图")
-            return False
-            
-        match_like = self.servo.multiscale_match(menu_screen, Config.SEEDS["like"])
-        if not match_like: match_like = self.servo.call_sift_server(menu_screen, "like")
-        
-        if match_like:
-            l_pos, l_rect = match_like['pos'], match_like['rect']
-            self.runtime_assets["like"] = menu_screen[l_rect[1]:l_rect[3], l_rect[0]:l_rect[2]]
-            self.vector = (l_pos[0] - d_pos[0], l_pos[1] - d_pos[1])
-            logger.info(f"✅ [{self.adb_manager.device_id}] 校准成功 (Vector: {self.vector})")
+        for attempt in range(1, max_retries + 1):
+            screen = self.servo.get_screen_cv()
+            if screen is None:
+                logger.error(f"❌ [{self.adb_manager.device_id}] 无法获取屏幕截图 (尝试 {attempt}/{max_retries})")
+                if attempt == max_retries:
+                    return False
+                self.random_sleep(1.0, 2.0)
+                continue
+
+            match = self.servo.multiscale_match(screen, Config.SEEDS["dots"])
+            if not match: match = self.servo.call_sift_server(screen, "dots")
+
+            if not match:
+                logger.warning(f"⚠️ [{self.adb_manager.device_id}] 未找到dots按钮 (尝试 {attempt}/{max_retries})")
+                if attempt == max_retries:
+                    logger.critical(f"❌ [{self.adb_manager.device_id}] 校准失败: 未找到dots按钮")
+                    return False
+                self.random_sleep(1.0, 2.0)
+                continue
+
+            d_pos, d_rect = match['pos'], match['rect']
+            self.runtime_assets["dots"] = screen[d_rect[1]:d_rect[3], d_rect[0]:d_rect[2]]
+
             self.adb_manager.touch(*d_pos)
-            self.random_sleep(0.5, 0.8)
-            return True
-        else:
-            logger.critical(f"❌ [{self.adb_manager.device_id}] 校准失败: 未找到赞图标")
-            self.adb_manager.touch(*d_pos) 
-            return False
+            self.random_sleep(0.5, 1.0)  # 等待菜单弹出
+            menu_screen = self.servo.get_screen_cv()
+
+            if menu_screen is None:
+                logger.warning(f"⚠️ [{self.adb_manager.device_id}] 无法获取菜单屏幕截图 (尝试 {attempt}/{max_retries})")
+                if attempt == max_retries:
+                    return False
+                self.random_sleep(1.0, 2.0)
+                continue
+
+            match_like = self.servo.multiscale_match(menu_screen, Config.SEEDS["like"])
+            if not match_like: match_like = self.servo.call_sift_server(menu_screen, "like")
+
+            if match_like:
+                l_pos, l_rect = match_like['pos'], match_like['rect']
+                self.runtime_assets["like"] = menu_screen[l_rect[1]:l_rect[3], l_rect[0]:l_rect[2]]
+                self.vector = (l_pos[0] - d_pos[0], l_pos[1] - d_pos[1])
+                logger.info(f"✅ [{self.adb_manager.device_id}] 校准成功 (Vector: {self.vector})")
+                self.adb_manager.touch(*d_pos)  # 关闭菜单
+                self.random_sleep(0.5, 0.8)
+                return True
+            else:
+                logger.warning(f"⚠️ [{self.adb_manager.device_id}] 未找到like图标 (尝试 {attempt}/{max_retries})")
+                self.adb_manager.touch(*d_pos)  # 关闭菜单以重试
+                if attempt == max_retries:
+                    logger.critical(f"❌ [{self.adb_manager.device_id}] 校准失败: 未找到like图标")
+                    return False
+                self.random_sleep(1.0, 2.0)
+
+        return False
 
     def check_liked_status(self, screen, dot_pos):
         if not self.vector: return False
         lx, ly = dot_pos[0] + self.vector[0], dot_pos[1] + self.vector[1]
-        y1, y2 = int(ly - 40), int(ly + 40)
-        x1, x2 = int(lx - 40), int(lx + 40)
+        y1, y2 = int(ly - self.roi_offset), int(ly + self.roi_offset)
+        x1, x2 = int(lx - self.roi_offset), int(lx + self.roi_offset)
         roi = screen[max(0, y1):min(self.height, y2), max(0, x1):min(self.width, x2)]
         if roi.size == 0: return False
         hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
@@ -359,9 +390,42 @@ class BotController:
                cv2.inRange(hsv, np.array([170, 150, 150]), np.array([180, 255, 255]))
         return cv2.countNonZero(mask) > 15
 
+    def reset_to_top(self, max_retries=5):
+        logger.info(f"🔄 [{self.adb_manager.device_id}] 点赞达到限额，重置到顶部...")
+        top_region_height = int(self.height * 0.2)
+        template_path = Config.SEEDS["pengyouquan"]  # 假设模板文件存在
+
+        for attempt in range(1, max_retries + 1):
+            screen = self.servo.get_screen_cv()
+            if screen is None:
+                self.random_sleep(1.0, 2.0)
+                continue
+
+            # 只截取顶部20%区域
+            top_screen = screen[0:top_region_height, :]
+
+            match = self.servo.multiscale_match(top_screen, template_path)
+            if not match: match = self.servo.call_sift_server(top_screen, "pengyouquan")
+
+            if match:
+                logger.info(f"✅ [{self.adb_manager.device_id}] 已到顶部 (找到朋友圈标题)")
+                self.random_sleep(0.5, 1.0)
+                return True
+
+            # 未找到，向上滑动 (从下往上滑)
+            logger.warning(f"⚠️ [{self.adb_manager.device_id}] 未到顶部，向上滑动 (尝试 {attempt}/{max_retries})")
+            center_x = self.width // 2
+            start_y = int(self.height * 0.7)  # 从下部开始
+            end_y = int(self.height * 0.3)    # 向上滑到上部
+            self.adb_manager.swipe(center_x, start_y, center_x, end_y, duration=0.6)
+            self.random_sleep(0.8, 1.2)
+
+        logger.critical(f"❌ [{self.adb_manager.device_id}] 重置到顶部失败")
+        return False
+
     def execute_pipeline(self):
         if not self.calibrate(): return
-        logger.info(f"🚀 [{self.adb_manager.device_id}] 多目标优先流水线启动")
+        logger.info(f"🚀 [{self.adb_manager.device_id}] 多目标优先流水线启动 (限额: {self.like_limit})")
         
         while True:
             screen = self.servo.get_screen_cv()
@@ -374,7 +438,7 @@ class BotController:
             all_buttons = self.servo.find_all_buttons(screen, self.runtime_assets["dots"])
             
             # 过滤掉顶部死区内的
-            valid_buttons = [b for b in all_buttons if b[1] > Config.TOP_DEAD_ZONE]
+            valid_buttons = [b for b in all_buttons if b[1] > self.top_dead_zone]
             
             if valid_buttons:
                 # 永远取 Top 1
@@ -394,7 +458,7 @@ class BotController:
                 # [优化] 自适应滑动：基于当前处理的 cy 和下一个按钮的距离计算（实现一次处理一条）
                 if len(valid_buttons) > 1:
                     next_cy = valid_buttons[1][1]
-                    calc_dist = max(0, next_cy - cy) + Config.SWIPE_BUFFER_PX  # 按钮间实际距离 + 缓冲
+                    calc_dist = max(0, next_cy - cy) + self.swipe_buffer_px  # 按钮间实际距离 + 缓冲
                     logger.info(f"📐 [{self.adb_manager.device_id}] 实时计算滑动距离: {calc_dist} (基于当前Y={cy} 和下一个Y={next_cy})")
                 else:
                     calc_dist = int(self.height * 0.25)  # 默认减小以加快
@@ -410,6 +474,14 @@ class BotController:
                 self.last_cy = None
                 self.random_sleep(0.6, 0.9)  # 减小睡眠时间，加快速度
             
+            if self.like_count >= self.like_limit:
+                if self.reset_to_top():
+                    self.like_count = 0
+                    self.calibrate()  # 重新校准
+                else:
+                    logger.error(f"❌ [{self.adb_manager.device_id}] 重置失败，暂停...")
+                    time.sleep(60)  # 暂停一分钟重试
+
             if self.action_count >= Config.BURST_LIMIT:
                 logger.info(f"💤 [{self.adb_manager.device_id}] 冷却休息...")
                 time.sleep(random.randint(40, 70))
@@ -442,9 +514,10 @@ class BotController:
             ty = int(dot_pos[1] + self.vector[1] + random.randint(-2, 2))
             
             logger.info(f"🔥 [{self.adb_manager.device_id}] [动作] 点赞")
-            watch_rect = (int(tx-30), int(ty-40), int(dot_pos[0]+30), int(dot_pos[1]+40))
+            watch_rect = (int(tx - self.roi_offset), int(ty - self.roi_offset * 1.33), int(dot_pos[0] + self.roi_offset), int(dot_pos[1] + self.roi_offset * 1.33))  # 调整为动态
             self.adb_manager.touch(tx, ty)
             self.action_count += 1
+            self.like_count += 1
             self.servo.wait_for_ui_change(watch_rect, menu_screen, timeout=1.0)  # 减小超时，加快
 
     def adaptive_swipe(self, pixel_distance):
@@ -452,8 +525,8 @@ class BotController:
         real_dist_pct = max(Config.MIN_SWIPE_DIST_PCT, min(dist_pct, Config.MAX_SWIPE_DIST_PCT))
         
         center_x = self.width // 2
-        start_x = int(random.gauss(center_x, 20)) 
-        end_x = int(start_x + random.randint(-15, 15))
+        start_x = int(random.gauss(center_x, self.width * 0.02)) 
+        end_x = int(start_x + random.randint(-int(self.width * 0.015), int(self.width * 0.015)))
         
         min_start = Config.SWIPE_START_RANGE[0]
         max_start = Config.SWIPE_START_RANGE[1]
@@ -467,8 +540,8 @@ class BotController:
         
         # [关键修复] 滑动后立即轻触停止惯性漂移（用结束点附近的安全位置）
         self.random_sleep(0.1, 0.2)  # 微小延迟等滑动完成，减小时间
-        stop_touch_x = center_x + random.randint(-50, 50)  # 中央偏随机
-        stop_touch_y = max(end_y, int(self.height * 0.4)) + random.randint(-20, 20)  # 确保在中部以上，避免底部导航
+        stop_touch_x = center_x + random.randint(-int(self.width * 0.05), int(self.width * 0.05))  # 中央偏随机
+        stop_touch_y = max(end_y, int(self.height * 0.4)) + random.randint(-int(self.height * 0.02), int(self.height * 0.02))  # 确保在中部以上，避免底部导航
         logger.debug(f"🛑 [{self.adb_manager.device_id}] 停止漂移: 轻触 @ ({stop_touch_x}, {stop_touch_y})")
         self.adb_manager.touch(stop_touch_x, stop_touch_y)
         
@@ -488,9 +561,9 @@ def manage_cv_server():
     logger.info(f"✅ CV 服务器进程启动 (PID: {p.pid})")
     return p
 
-def select_and_configure_devices() -> List[Tuple[str, bool]]:
+def select_and_configure_devices() -> List[Tuple[str, bool, int]]:
     """
-    返回: [(device_id, run_bot: bool), ...]
+    返回: [(device_id, run_bot: bool, like_limit: int), ...]
     """
     devices = ADBManager.list_devices()
     if not devices:
@@ -516,13 +589,18 @@ def select_and_configure_devices() -> List[Tuple[str, bool]]:
     if not selected_ids:
         return []
 
-    # 对每个选中的设备，询问是否运行 bot 主功能
+    # 对每个选中的设备，询问是否运行 bot 主功能和点赞限额
     configured = []
     logger.info("\n接下来为每个设备选择运行模式：")
     for dev_id in selected_ids:
         run_bot = input(f"设备 {dev_id} 是否运行完整点赞自动化？(y/n): ").strip().lower() == 'y'
-        configured.append((dev_id, run_bot))
-        logger.info(f"  → {dev_id} : {'完整自动化' if run_bot else '仅连接（监控/调试）'}")
+        like_limit = Config.LIKE_LIMIT_DEFAULT
+        if run_bot:
+            custom_limit = input(f"设备 {dev_id} 的点赞限额 (默认 {Config.LIKE_LIMIT_DEFAULT}): ").strip()
+            if custom_limit.isdigit():
+                like_limit = int(custom_limit)
+        configured.append((dev_id, run_bot, like_limit))
+        logger.info(f"  → {dev_id} : {'完整自动化' if run_bot else '仅连接（监控/调试）'} (限额: {like_limit})")
 
     return configured
 
@@ -541,12 +619,12 @@ if __name__ == "__main__":
             raise Exception("无有效设备配置，程序退出")
 
         # 3. 提取 device_id 列表用于清理（或直接用 configured_devices）
-        selected_devices = [dev_id for dev_id, _ in configured_devices]
+        selected_devices = [dev_id for dev_id, _, _ in configured_devices]
 
         # 4. 启动线程...
         threads = []
-        for device_id, should_run_bot in configured_devices:
-            bot = BotController(device_id)
+        for device_id, should_run_bot, like_limit in configured_devices:
+            bot = BotController(device_id, like_limit)
             
             if should_run_bot:
                 logger.info(f"启动完整 bot 线程: {device_id}")
