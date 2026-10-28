@@ -15,25 +15,15 @@
 [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103&style=for-the-badge)](https://github.com/ellerbrock/open-source-badges/)
 [![Made with ❤️ in China](https://img.shields.io/badge/Made%20with%20❤️%20in-China-ff69b4.svg?style=for-the-badge)](https://github.com/throokie/pyquan-like)
 
-**WeChat Moments Auto-Liker Pro** 是目前最强微信朋友圈自动化点赞工具，融合 **航天级视觉算法 + 多设备并行 + 智能防封机制**，让你轻松实现「朋友圈刷屏式互动」！  
-**已累计帮助1用户提升社交效率** —— 现在，轮到你成为下一个社交之王了！🌟
+**WeChat Moments Auto-Liker Pro** 是基于 OpenCV 模板匹配的朋友圈空心赞辅助实验项目（研究/自用向），不保证全机型可用。
 
-> **一句话口号**：  
-> 手动点赞？太 2020 了！2026 年，让 Bot 替你疯狂打 call！
+演示需本地运行；占位图已移除。
 
-![Demo Showcase](https://via.placeholder.com/1280x720/1e3a8a/ffffff?text=WeChat+Moments+Auto-Liker+Live+Demo+2026)  
-*(真实演示：多设备并行、实时检测、精准点赞、丝滑滑动 – 画面流畅到飞起)*
+## 已知限制
 
-## 为什么大家都在用？（核心卖点）
-
-- **精准到像素级**：SIFT + 多尺度模板匹配 + 空间聚类去重，识别准确率高达 98%+
-- **多设备并行**：同时操控 10+ 台手机/模拟器，批量刷赞效率翻倍
-- **防封神器**：随机偏移、跳过概率、冷却休息、滑动缓冲，模拟真人操作，封号风险极低
-- **零门槛上手**：一键启动本地 CV 服务，支持 HarmonyOS / Android 全系列
-- **社区活跃**：超过 **X** 个 Star / **Y** 个 Fork / **Z** 次下载（数据实时更新）
-
-**一句话总结**：  
-**它不是工具，它是你的社交外挂** —— 让每一次滑动，都值得被点赞！
+- 分辨率、主题或微信版本变化会导致模板失效，需要按实际界面调整模板。
+- 自动化操作可能违反平台规范，请自行评估使用风险。
+- 提问请附系统版本、微信版本、日志和截图，以便定位问题。
 
 ## 徽章墙（实时统计）
 
@@ -41,24 +31,25 @@
 |------------------|----------------------------------------------------------------------|-------------------------------|
 | 项目活跃度       | [![Stars](https://img.shields.io/github/stars/throokie/pyquan-like?style=for-the-badge&logo=github&color=yellow)](https://github.com/throokie/pyquan-like/stargazers) | 当前星标数（实时）            |
 | 社区贡献         | [![Contributors](https://img.shields.io/github/contributors/throokie/pyquan-like?style=for-the-badge&color=brightgreen&logo=github)](https://github.com/throokie/pyquan-like/graphs/contributors) | 贡献者数量                    |
-| 代码质量         | [![CodeQL](https://img.shields.io/github/workflow/status/throokie/pyquan-like/CodeQL?style=for-the-badge&logo=github&label=CodeQL)](https://github.com/throokie/pyquan-like/security/code-scanning) | 自动安全扫描通过              |
+| 代码质量         | [![CodeQL](https://img.shields.io/github/workflow/status/throokie/pyquan-like/CodeQL?style=for-the-badge&logo=github&label=CodeQL)](https://github.com/throokie/pyquan-like/security/code-scanning) | 安全扫描状态              |
 | 构建状态         | [![CI](https://img.shields.io/github/actions/workflow/status/throokie/pyquan-like/ci.yml?branch=main&style=for-the-badge&logo=github&label=CI)](https://github.com/throokie/pyquan-like/actions) | CI/CD 持续集成                |
 | 编程语言         | [![Top Language](https://img.shields.io/github/languages/top/throokie/pyquan-like?style=for-the-badge&logo=python&color=ff69b4)](https://github.com/throokie/pyquan-like) | Python 占比最高               |
 | 开源精神         | [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103&style=for-the-badge)](https://github.com/ellerbrock/open-source-badges/) | 我们热爱开源！                |
 
-## 快速上手（30秒起飞）
+## 快速上手
 
 ```bash
 # 1. 克隆项目
 git clone https://github.com/throokie/pyquan-like.git
 cd pyquan-like
 
-# 2. 安装依赖（一键安装核心包）
+# 2. 安装依赖
 pip install -r requirements.txt
 
-# 3. 准备模板图片（必须！），我已帮你准备了，不用谢
+# 3. 仓库已附带模板图片，请按实际界面检查是否适用
 #   two_dots_orig.png    → 朋友圈动态的“...”按钮
 #   like_hollow_orig.png → 空心点赞图标
 
-# 4. 启动（坐等起飞！）
+# 4. 启动
 python client.py
+```
